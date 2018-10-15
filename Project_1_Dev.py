@@ -22,9 +22,9 @@ dat['AvgStatement'] = dat.iloc[:,11:17].mean(axis=1)
 #   within the documentation, thus it was put into the other cateogry 
 dat['EDUCATION'].value_counts()
 
-dat[dat['EDUCATION']==0] = 4
-dat[dat['EDUCATION']==5] = 4
-dat[dat['EDUCATION']==6] = 4
+dat['EDUCATION'].where(dat['EDUCATION']<4,4,inplace=True)
+dat['EDUCATION'].where(dat['EDUCATION']!=0,4,inplace=True)
+
 
 dat['EDUCATION'].value_counts()
 
