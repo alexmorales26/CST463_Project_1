@@ -17,6 +17,10 @@ dat.rename(columns={'default.payment.next.month':'default'},inplace=True)
 dat.drop('ID',axis=1,inplace=True)
 
 dat['AvgStatement'] = dat.iloc[:,11:17].mean(axis=1)
+dat['OnTimePayment'] = np.ceil(dat.iloc[:,5:11].mean(axis=1))
+dat['OnTimePayment'].where(dat['OnTimePayment']!=-0,0,inplace=True)
+dat['AvgPayAmt'] = dat.iloc[:,17:23].mean(axis=1)
+dat['PayDiff'] = dat['AvgStatement']-dat['AvgPayAmt']
 
 #For eduation the values of 0, 5, and 6 are not explained on the attribute information
 #   within the documentation, thus it was put into the other cateogry 
@@ -47,11 +51,23 @@ sns.violinplot(dat['EDUCATION'], dat['LIMIT_BAL'])
 
 sns.countplot(dat['EDUCATION'])
 
-
 plt.hist(dat['AGE'])
 
+#After finding the average amount of people statements over 6 months, we wanted
+#to know which sex was more likely surpass their credit limit, and of those, who 
+#paid them off on time
 temp = dat[dat['AvgStatement']>dat['LIMIT_BAL']]
-plt.hist(temp['SEX'])
+sns.countplot(temp['SEX'],hue=temp['OnTimePayment'])
+plt.title('Sex of High Credit Users, Sorted by On Time Payment')
 
-sns.barplot(y = 'AGE',x='default',hue='EDUCATION',data=dat)
+#We have simplified our education column and we would like to see if there
+#education is a good justifier of someone defaulting on their credit.
+sns.countplot(x='default',hue='EDUCATION',data=dat)
+plt.title("Count of Those who Defaulted on Credit, Sorted by Education")
 
+#With our new PayDiff column, we are trying to see if there is any sort of corellation
+#between the amount of leftover debt and their average duly payments.
+payment = sns.jointplot(x='PayDiff',y='OnTimePayment',data=dat,kind='hex',stat_func=None,ylim=(-2,3),xlim=(-50000,300000))
+plt.title('Payment Difference by On Time Payments',loc='left')
+legend = plt.colorbar()
+legend.set_label('Count')
