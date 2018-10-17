@@ -8,7 +8,9 @@ Created on Wed Oct 10 17:51:36 2018
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
+import seaborn as sns;sns.set()
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
 
 dat = pd.read_csv("https://raw.githubusercontent.com/alexmorales26/CST463_Project_1/master/default_cc_train.csv")
 
@@ -71,3 +73,21 @@ payment = sns.jointplot(x='PayDiff',y='OnTimePayment',data=dat,kind='hex',stat_f
 plt.title('Payment Difference by On Time Payments',loc='left')
 legend = plt.colorbar()
 legend.set_label('Count')
+
+# this swarm plot uses X as a quote on quote categorical feature. Therefore, we want to
+# know the avgStatement of each age contained in the datset. This will give a better picture
+# to see what age group has this biggest avgStatement
+sns.swarmplot(x="AGE",y="AvgStatement", data = dat)
+#train split and SVM crapp
+# =============================================================================
+# X = dat
+# y= dat['default']
+# 
+# train_X,test_X,train_y,test_y = train_test_split(X,y,test_size=0.3)
+# 
+# svm_clf = SVC()
+# svm_clf.fit(train_X,train_y)
+# X_1 = svm_clf.predict(test_X)
+# =============================================================================
+
+
