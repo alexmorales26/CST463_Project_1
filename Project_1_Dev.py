@@ -28,15 +28,11 @@ dat.drop('ID',axis=1,inplace=True)
 
 #Average statement per person into a column 
 dat['AvgStatement'] = dat.iloc[:,11:17].mean(axis=1)
-<<<<<<< HEAD
-
 
 dat['OnTimePayment'] = np.ceil(dat.iloc[:,5:11].mean(axis=1))
 dat['OnTimePayment'].where(dat['OnTimePayment']!=-0,0,inplace=True)
 
 dat['AvgPayAmt'] = dat.iloc[:,17:23].mean(axis=1)
-=======
->>>>>>> 3688f6968edf47f5f0897129c2ea1f515d84833f
 
 dat['PayDiff'] = dat['AvgStatement']-dat['AvgPayAmt']
 #For eduation the values of 0, 5, and 6 are not explained on the attribute information
@@ -72,7 +68,6 @@ plt.hist(temp['SEX'])
 
 sns.barplot(y = 'AGE',x='default',hue='EDUCATION',data=dat)
 
-<<<<<<< HEAD
 # svm crap starts here =====================================================
 # X includes derived features
 X= dat[["AvgStatement","EDUCATION","LIMIT_BAL","PayDiff"]]
@@ -93,12 +88,12 @@ print(svm_clf.score(X_test,y_test))
 
 
 # grid search => best hyperparams will be outputted and best prediction features as well
+
 param_grid  = [{'degree':[3,5,7],'kernel':['poly','rbf','sigmoid']}]
 GridSearch = GridSearchCV(svm_clf,param_grid,cv=5,scoring='accuracy',n_jobs=-1)
 GridSearch.fit(X_train,y_train)
 print(GridSearch.best_params_)
 print(GridSearch.best_estimator_)
-
 
 
 # new svc and then re-apply SVC will grid search hyperparams
@@ -112,8 +107,4 @@ svm_clf_new.predict(X_test)
 # should be the same SVC score as above, meaning that is as good as SVC will get
 print(svm_clf_new.score(X_test,y_test))
 
-=======
-
-
->>>>>>> 3688f6968edf47f5f0897129c2ea1f515d84833f
 
