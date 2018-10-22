@@ -5,14 +5,21 @@ Created on Wed Oct 10 17:51:36 2018
 @author: Alexander Morales, Nolan Guzman, & Alyssia Goodwin
 """
 
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.svm import SVC
+import seaborn as sns;sns.set()
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
 from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+import warnings
+warnings.filterwarnings('ignore')
+
+
 dat = pd.read_csv("https://raw.githubusercontent.com/alexmorales26/CST463_Project_1/master/default_cc_train.csv")
 
 #sum of the null values
@@ -23,7 +30,6 @@ dat.describe()
 dat.dtypes
 #Renames deafult payment next month to default 
 dat.rename(columns={'default.payment.next.month':'default'},inplace=True)
-#drop the ID 
 dat.drop('ID',axis=1,inplace=True)
 
 #Average statement per person into a column 
@@ -39,34 +45,30 @@ dat['PayDiff'] = dat['AvgStatement']-dat['AvgPayAmt']
 #   within the documentation, thus it was put into the other cateogry 
 dat['EDUCATION'].value_counts()
 
-dat[dat['EDUCATION']==0] = 4 
-dat[dat['EDUCATION']==5] = 4
-dat[dat['EDUCATION']==6] = 4
-
-dat['EDUCATION'].value_counts()
-
-
-#Male = 1, Female = 2.
-#More Females than male 
-dat['SEX'].value_counts()
-
-#Most people have university education or higher
-plt.hist(dat['EDUCATION'])
-
-#Looking at the plots it is able to be seen the higher education a person has
-#such as the distribution for graduate school has a higher balance compared to 
-#the other education. 
+dat['EDUCATION'].where(dat['EDUCATION']<4,4,inplace=True)
+dat['EDUCATION'].where(dat['EDUCATION']!=0,4,inplace=True)
 
 sns.violinplot(dat['EDUCATION'], dat['LIMIT_BAL'])
+plt.title("Education of Individual vs Limit Balance")
+plt.xlabel("Education")
+plt.ylabel("Limit Balance")
 
+sns.countplot(x='default',hue='EDUCATION',data=dat)
+plt.title("Count of Those who Defaulted on Credit, Sorted by Education")
 
-plt.hist(dat['AGE'])
+dat['SEX'].value_counts()
 
 
 temp = dat[dat['AvgStatement']>dat['LIMIT_BAL']]
-plt.hist(temp['SEX'])
+sns.countplot(temp['SEX'],hue=temp['OnTimePayment'])
+plt.title('Sex of High Credit Users, Sorted by On Time Payment')
 
-sns.barplot(y = 'AGE',x='default',hue='EDUCATION',data=dat)
+
+
+payment = sns.jointplot(x='PayDiff',y='OnTimePayment',data=dat,kind='hex',stat_func=None,ylim=(-2,3),xlim=(-50000,300000))
+plt.title('Payment Difference by On Time Payments',loc='left')
+legend = plt.colorbar()
+legend.set_label('Count')
 
 # svm crap starts here =====================================================
 # X includes derived features
@@ -106,5 +108,39 @@ svm_clf_new.fit(X_train,y_train)
 svm_clf_new.predict(X_test)
 # should be the same SVC score as above, meaning that is as good as SVC will get
 print(svm_clf_new.score(X_test,y_test))
+###
+
+# adaBoost Classifier
+ada_clf = AdaBoostClassifier(
+        DecisionTreeClassifier(max_depth=4),
+        n_estimators=200,
+        algorithm="SAMME.R", 
+        learning_rate=0.5
+        )
+ada_clf.fit(X_train,y_train)
+print(ada_clf.feature_importances_)
+
+
+
+### all 25 features ada boost
+A= dat.drop('default',axis=1)
+y= dat["default"]
+# we normalize X for better performance
+A = normalize(A)
+# split the data with 70% being training data, and 30% for test
+A_train, A_test, y_train, y_test = train_test_split(A, y, test_size=0.3)
+ada_clf2 = AdaBoostClassifier(
+        DecisionTreeClassifier(max_depth=4),
+        n_estimators=200,
+        algorithm="SAMME.R", 
+        learning_rate=0.5
+        )
+ada_clf2.fit(A_train,y_train)
+print(ada_clf2.feature_importances_)
+
+
+
+
+
 
 
